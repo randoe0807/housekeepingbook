@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'allauth',
+    'allauth.account',
     'rest_framework',
     'markdownx',
     
     'housekeepingbook.apps.HousekeepingbookConfig',
+    'accounts.apps.AccountsConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -62,6 +64,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -140,3 +144,39 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ユーザー認証関係
+# CustomUserモデルを使用する
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# django-allauthで利用するdjango.contrib.sitesを使うためにサイト識別用IDを設定
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+# 一般ユーザー用の認証バックエンド
+    'allauth.account.auth_backends.AuthenticationBackend',
+# 管理サイトは設定しない
+)
+
+# メールアドレス認証に変更する設定
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# ユーザー名を使用しない設定
+ACCOUNT_USERNAME_REQUIRED = False
+
+# サインアップにメールアドレス確認をはさむよう設定
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+
+# ログイン/ログアウト後の遷移先を設定
+LOGIN_REDIRECT_URL = 'housekeepingbook:index'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'account_login'
+
+# ログアウトリンクのクリック一発でログアウトする設定
+ACCOUNT_LOGOUT_ON_GET = True
+
+# django-allauthが送信するメールの件名に自動付与される接頭辞をブランクにする設定
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
+
+# デフォルトのメール層sン元を設定
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
